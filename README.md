@@ -85,7 +85,6 @@ You can either use a Particle Photon or an Electron to control the tree. Since t
 
 The easiest way to setup the tree is to hang it as an ornament while powering over USB. You can also rig up your own 5V power supply cable and plug it into the header.
 
-
 ### On a breadboard
 
 You can use the bottom header to mount the tree on a breadboard and power/control it via your own choice of hardware or to daisy chain the tree to other trees or dotstar projects.
@@ -100,6 +99,10 @@ You can use the bottom header to mount the tree on a breadboard and power/contro
 </a></p>
 
 There is [a hosted version of the web interface you can use to control your tree][Web interface]. Simply login with your Particle account, select your device and you'll be able to control the LEDs and music from a desktop or mobile browser.
+
+## CHEERLIGHTS MODE
+
+[Cheerlights](https://cheerlights.com/) is a community of connected lights around the world. The color is set by anyone on the Discord server and other social networks. The color is then broadcast to all the connected lights. The XMAS tree can connect to the CheerLights project when you select mode 5.
 
 ## MODIFYING THE FIRMWARE
 

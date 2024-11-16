@@ -1,3 +1,9 @@
+// This #include statement was automatically added by the Particle IDE.
+#include <ThingSpeak.h>
+
+// This #include statement was automatically added by the Particle IDE.
+#include <dotstar.h>
+
 /*
  *      Copyright 2017 Particle Industries, Inc.
  *
@@ -64,6 +70,31 @@ Adafruit_DotStar leds = Adafruit_DotStar(TOTAL_LED, PIN_LED_DATA, PIN_LED_CLOCK,
 /* Two threads will be used for processing songs and LED animations */
 Thread *animationWorker, *songWorker;
 
+/* Variables used for ThingSpeak and CheerLights */
+unsigned long cheerLightsChannelNumber = 1417;
+unsigned long previousMillis = 0;
+const long interval = 3000;
+int currentColor = -1;
+TCPClient client;
+
+// List of CheerLights color names
+String colorName[] = {"none","red","pink","green","blue","cyan","white","warmwhite","oldlace","purple","magenta","yellow","orange"};
+
+// Map of RGB values for each of the CheerLights color names
+int colorRGB[][3] = {     0,  0,  0,  // "none"
+                        255,  0,  0,  // "red"
+                        255,192,203,  // "pink"
+                          0,255,  0,  // "green"
+                          0,  0,255,  // "blue"
+                          0,215, 75,  // "cyan",
+                        255,255,255,  // "white",
+                        255,223,223,  // "warmwhite",
+                        255,223,223,  // "oldlace",
+                        128,  0,128,  // "purple",
+                        255,  0,255,  // "magenta",
+                        255,255,  0,  // "yellow",
+                        255, 49,  0}; // "orange"};
+
 /* LEDs hardware initialization */
 void ledsInit()
 {
@@ -103,6 +134,7 @@ int playLED(String color)
     for (int i = 0; i < TOTAL_LED; i++)
         leds.setPixelColor(i, strtol(color, NULL, 0));
     leds.show();
+    return 1;
 }
 
 /* Turn off all LEDs */
@@ -432,6 +464,8 @@ void processAnimations()
                 redGreen(500);
             else if (currentAnimation == SPARKCYAN)
                 sparkCyan(3);
+            else if (currentAnimation == CHEERLIGHTS)
+                cheerLights(5);    
         }
 
         delay(250);
@@ -543,6 +577,40 @@ void printTree()
     }
 }
 
+/* Process CheerLights */
+void processCheerLights()
+{
+    /* If Animation is CheerLights, get the current color */
+    if (currentAnimation == CHEERLIGHTS) {
+        // Get the current time count
+        unsigned long currentMillis = millis();
+    
+        // check to see if the time interval has passed
+        if (currentMillis - previousMillis >= interval) {
+            // save the last time you ran the routine
+            previousMillis = currentMillis;
+    
+            // Read the ThingSpeak channel, the latest value from field 1 of channel 1417
+            String color = ThingSpeak.readStringField(cheerLightsChannelNumber, 1);
+            setColor(color);
+        }
+    }
+}
+
+void setColor(String color) {
+  for(int iColor = 0; iColor <= 12; iColor++)
+  {
+    if(color == colorName[iColor])
+    {
+        if(iColor == currentColor) {
+            return;
+        }
+        currentColor = iColor;
+        return;
+    }
+  }
+}
+
 /* Wiring programming starts from setup() and then calling loop() */
 void setup()
 {
@@ -566,6 +634,9 @@ void setup()
     /* Start to play the 1st song and LED animation */
     playSong("0");
     playAnimation("0");
+    
+    /* ThingSpeak setup*/
+    ThingSpeak.begin(client);
 }
 
 /* This will be called repeatedly */
@@ -579,5 +650,8 @@ void loop()
     
     /* Process the Cloud events */
     processCloud();
+    
+    /* Process CheerLights */
+    processCheerLights();
 }
 
